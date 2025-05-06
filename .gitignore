@@ -1,0 +1,11 @@
+# build artefacts
+__pycache__/
+.pytest_cache/
+frontend/.next/
+*.sqlite
+
+# OS noise
+.DS_Store
+
+# secrets
+.env
