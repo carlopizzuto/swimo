@@ -1,0 +1,48 @@
+
+services:
+  # db:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_USER: swimo
+  #     POSTGRES_PASSWORD: swimo
+  #     POSTGRES_DB: swimo
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+  #   networks: [swimo-net]
+
+  backend:
+    image: swimo-backend:dev
+    build:
+      context: ../backend
+    # hot‑reload while developing
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ../backend/app:/app/app           # live‑code mount
+    ports:
+      - "8000:8000"
+    # depends_on:
+    #   - db
+    networks: [swimo-net]
+
+  frontend:
+    image: swimo-frontend:dev
+    build:
+      context: ../frontend
+    command: npm run dev                  # Next.js dev server
+    volumes:
+      - ../frontend:/app                  # live‑code mount
+      - /app/node_modules                 # keep host/node_modules out
+    ports:
+      - "3000:3000"
+    environment:
+      # Inside Docker network the backend is reachable at http://backend:8000
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks: [swimo-net]
+
+networks:
+  swimo-net:
+
+volumes:
+  db_data:
