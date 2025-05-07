@@ -1,14 +1,19 @@
 
 services:
-  # db:
-  #   image: postgres:15
-  #   environment:
-  #     POSTGRES_USER: swimo
-  #     POSTGRES_PASSWORD: swimo
-  #     POSTGRES_DB: swimo
-  #   volumes:
-  #     - db_data:/var/lib/postgresql/data
-  #   networks: [swimo-net]
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    env_file:
+      - ../.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks: [swimo-net]
 
   backend:
     image: swimo-backend:dev
@@ -20,9 +25,12 @@ services:
       - ../backend/app:/app/app           # live‑code mount
     ports:
       - "8000:8000"
-    # depends_on:
-    #   - db
-    networks: [swimo-net]
+    env_file:
+      - ../.env
+    depends_on:
+      - db
+    networks:
+      - swimo-net
 
   frontend:
     image: swimo-frontend:dev

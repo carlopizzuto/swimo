@@ -1,14 +1,14 @@
-from fastapi import APIRouter
-import random
+from fastapi import APIRouter, Depends
+from sqlmodel import select
+from random import choice
+from ..db import get_session
+from ..models import Movie, Swipe
 
 router = APIRouter()
 
-DUMMY_MOVIES = [
-    {"id": 1, "title": "Inception", "poster": "/static/inception.jpg"},
-    {"id": 2, "title": "The Matrix", "poster": "/static/matrix.jpg"},
-    {"id": 3, "title": "Interstellar", "poster": "/static/interstellar.jpg"},
-]
-
-@router.get("/random")
-async def random_movie():
-    return random.choice(DUMMY_MOVIES)
+@router.get("/random/", response_model=Movie)
+@router.get("/random", response_model=Movie)
+def random_movie(session=Depends(get_session)):
+    ids = session.exec(select(Movie.id)).all()
+    movie = session.get(Movie, choice(ids))
+    return movie
