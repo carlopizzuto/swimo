@@ -1,5 +1,5 @@
-from .models import Movie
-from .db import engine, Session
+from ..app.models import Movie
+from ..app.db import engine, Session
 from sqlalchemy import text
 
 SEED_MOVIES = [

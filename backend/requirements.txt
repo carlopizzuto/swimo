@@ -6,3 +6,5 @@ pandas
 scikit-learn
 sentence-transformers
 kagglehub
+jupyter
+ipykernel
