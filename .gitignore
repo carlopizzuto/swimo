@@ -4,8 +4,16 @@ __pycache__/
 frontend/.next/
 *.sqlite
 
+*.csv
+
 # OS noise
 .DS_Store
+.cursor
+.vscode
 
 # secrets
 .env
+
+# virtual environment
+venv/
+venv
