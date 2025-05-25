@@ -43,7 +43,7 @@ export default function Home() {
   const fetchMovie = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/movies/random/");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/movies/random/`);
       setMovie(await res.json());
     } catch (error) {
       console.error("Error fetching movie:", error);
@@ -55,7 +55,7 @@ export default function Home() {
   const recommendMovie = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/movies/recommend/");
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/movies/recommend/`);
       const movies = await res.json();
       setMovie(movies[0]);
     } catch (error) {
@@ -69,7 +69,7 @@ export default function Home() {
     if (!movie) return;
     
     try {
-      await fetch("http://localhost:8000/swipes/", {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/swipes/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
