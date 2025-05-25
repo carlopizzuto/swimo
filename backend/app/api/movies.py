@@ -1,16 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import select
+from sqlmodel import select, Session
 from random import choice
 from typing import List
-import os
-from ..db import get_session
+
+from ..db import engine, get_session
 from ..models import Movie, Swipe
 from ..recommender.recommender import MovieRecommender
 
 router = APIRouter()
-
-# Path to the embeddings file
-EMBEDDINGS_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "recommender", "data", "movie_embeddings.pkl")
 
 # Lazy-loaded recommender instance
 _recommender = None
@@ -18,10 +15,10 @@ _recommender = None
 def get_recommender():
     global _recommender
     if _recommender is None:
-        if os.path.exists(EMBEDDINGS_PATH):
-            _recommender = MovieRecommender(EMBEDDINGS_PATH)
-        else:
-            raise HTTPException(status_code=500, detail="Movie embeddings not found. Please run seed_db.py first.")
+        try:
+            _recommender = MovieRecommender()
+        except ValueError as e:
+            raise HTTPException(status_code=500, detail=f"Failed to load embeddings from database: {str(e)}")
     return _recommender
 
 @router.get("/random/", response_model=Movie)
@@ -35,6 +32,7 @@ def random_movie(session=Depends(get_session)):
 def recommend_movies(user_id: int = 2, top_n: int = 5, session=Depends(get_session)):
     """
     Get movie recommendations based on user's swipe history.
+    Uses database-stored embeddings only (no pickle files).
     """
     # Get user's swipe history
     liked_query = select(Swipe.movie_id).where(Swipe.user_id == user_id, Swipe.direction == True)
@@ -48,7 +46,7 @@ def recommend_movies(user_id: int = 2, top_n: int = 5, session=Depends(get_sessi
         ids = session.exec(select(Movie.id)).all()
         recommended_ids = [choice(ids) for _ in range(min(top_n, len(ids)))]
     else:
-        # Get recommendations using the recommender
+        # Get recommendations using the database-only recommender
         recommender = get_recommender()
         recommended_ids = recommender.get_recommendations(
             liked_movie_ids=liked_movie_ids,
@@ -63,4 +61,4 @@ def recommend_movies(user_id: int = 2, top_n: int = 5, session=Depends(get_sessi
         if movie:
             recommended_movies.append(movie)
     
-    return recommended_movies
+    return recommended_movies 
