@@ -10,7 +10,11 @@ app = FastAPI(title="Swimo API", version="0.0.1")
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://*.railway.app", "https://*.up.railway.app"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "https://*.vercel.app",
+        "https://*.onrender.com"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
