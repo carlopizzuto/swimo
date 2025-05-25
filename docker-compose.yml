@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:15
+    image: postgres:16
     restart: unless-stopped
     env_file: .env
     environment:
@@ -18,10 +18,9 @@ services:
     build:
       context: ./backend
     env_file: .env
-    # hot‑reload while developing
     command: ["./wait-for-it.sh", "db:5432", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     volumes:
-      - ./backend/app:/app/app           # live‑code mount
+      - ./backend/app:/app/app
     ports:
       - "8000:8000"
     depends_on:
@@ -33,15 +32,14 @@ services:
     image: swimo-frontend:dev
     build:
       context: ./frontend
-    command: npm run dev                  # Next.js dev server
+    command: npm run dev
     volumes:
-      - ./frontend:/app                  # live‑code mount
-      - /app/node_modules                 # keep host/node_modules out
+      - ./frontend:/app
+      - /app/node_modules
     ports:
       - "3000:3000"
     environment:
-      # Inside Docker network the backend is reachable at http://backend:8000
-      - NEXT_PUBLIC_API_URL=http://backend:8000
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:
       - backend
     networks: [swimo-net]
