@@ -9,12 +9,27 @@ type Movie = {
   genres: string;
 };
 
+type Swipe = {
+  user_id: number;
+  movie_id: number;
+  direction: boolean;
+  ts: string;
+};
+
 export default function Home() {
   const [movie, setMovie] = useState<Movie | null>(null);
+
+  const [swipes, setSwipes] = useState<Swipe[]>([]);
 
   const fetchMovie = async () => {
     const res = await fetch("http://localhost:8000/movies/random/");
     setMovie(await res.json());
+  };
+
+  const recommendMovie = async () => {
+    const res = await fetch("http://localhost:8000/movies/recommend/");
+    const movies = await res.json();
+    setMovie(movies[0]);
   };
 
   const sendSwipe = async (dir: boolean) => {
@@ -23,18 +38,22 @@ export default function Home() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        user_id: 1,
+        user_id: 2,
         movie_id: movie.id,
         direction: dir,
         ts: new Date().toISOString(),
       }),
     });
+    setSwipes([
+      ...swipes,
+      { user_id: 2, movie_id: movie.id, direction: dir, ts: new Date().toISOString() },
+    ]);
     fetchMovie();
   };
 
   return (
     <main className="flex flex-col items-center justify-center h-screen gap-4">
-      <button className="btn" onClick={fetchMovie}>
+      <button className="btn" onClick={recommendMovie}>
         Start
       </button>
       {movie && (

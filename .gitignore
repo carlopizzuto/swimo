@@ -5,6 +5,7 @@ frontend/.next/
 *.sqlite
 
 *.csv
+*.pkl
 
 # OS noise
 .DS_Store
