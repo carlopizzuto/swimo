@@ -1,34 +1,83 @@
 import pandas as pd
 import pickle
 import base64
-from pathlib import Path
+import os
 import sys
+import asyncio
+import aiohttp
+import logging
+import argparse
+from pathlib import Path
 from datetime import datetime
 from sqlalchemy import text
+import kagglehub
+from kagglehub import KaggleDatasetAdapter
+
+# Set up logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Add the parent directory to sys.path to allow imports from app
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from app.db import engine, Session
+from app.db import engine, prod_engine, Session
 from app.models import Movie
 from app.recommender import MovieEmbedding
 
-DATA_DIR = Path(__file__).parent.parent / "data"
-EMBEDDINGS_DIR = Path(__file__).parent.parent / "recommender" / "data"
-KAGGLE_DATASET_PATH = DATA_DIR / "imdb_movies.csv"
-EMBEDDINGS_PATH = EMBEDDINGS_DIR / "movie_embeddings.pkl"
+# TMDB API configuration
+TMDB_API_KEY = os.getenv("TMDB_API_KEY")
+TMDB_BASE_URL = "https://api.themoviedb.org/3"
+TMDB_IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
-# Create directories if they don't exist
-DATA_DIR.mkdir(exist_ok=True)
-EMBEDDINGS_DIR.mkdir(exist_ok=True, parents=True)
 
-def load_kaggle_dataset():
-    """Load the Kaggle dataset."""
-    if not KAGGLE_DATASET_PATH.exists():
-        raise FileNotFoundError(f"Dataset not found at {KAGGLE_DATASET_PATH}. Please run fetch_kaggle_ds.py first.")
+class MoviePosterFetcher:
+    """Handles fetching movie poster URLs from TMDB API."""
     
-    print(f"Loading dataset from {KAGGLE_DATASET_PATH}")
-    return pd.read_csv(KAGGLE_DATASET_PATH)
+    def __init__(self):
+        self.api_available = bool(TMDB_API_KEY and TMDB_API_KEY != "your_api_key")
+        if not self.api_available:
+            logger.warning("TMDB_API_KEY not available - skipping poster fetching")
+        self.session = None
+        
+    async def __aenter__(self):
+        if self.api_available:
+            self.session = aiohttp.ClientSession()
+        return self
+        
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self.session:
+            await self.session.close()
+    
+    async def get_poster_url(self, title: str, year: int = None) -> str | None:
+        """Get poster URL for a movie."""
+        if not self.api_available:
+            return None
+            
+        try:
+            url = f"{TMDB_BASE_URL}/search/movie"
+            params = {
+                "api_key": TMDB_API_KEY,
+                "query": title,
+                "include_adult": "false"
+            }
+            
+            if year and isinstance(year, int) and year > 0:
+                params["year"] = year
+            
+            async with self.session.get(url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    results = data.get("results", [])
+                    if results and results[0].get("poster_path"):
+                        return f"{TMDB_IMAGE_BASE_URL}{results[0]['poster_path']}"
+                else:
+                    logger.warning(f"API request failed for {title}: {response.status}")
+            
+        except Exception as e:
+            logger.error(f"Error fetching poster for {title}: {e}")
+        
+        return None
+
 
 def extract_year(date_str):
     """Extract year from a date string."""
@@ -39,109 +88,140 @@ def extract_year(date_str):
     except:
         return None
 
-def clean_dataset(df):
-    """Clean and prepare the dataset."""
-    # Make a copy to avoid modifying the original
+
+def load_and_clean_dataset(count: int = 50):
+    """Load and clean the movie dataset."""
+    logger.info("Loading dataset from Kaggle...")
+    df = kagglehub.dataset_load(
+        KaggleDatasetAdapter.PANDAS,
+        "ashpalsingh1525/imdb-movies-dataset",
+        "imdb_movies.csv",
+    )
+    
+    # Clean dataset
     df = df.copy()
-    
-    # Extract year from date_x
     df['year'] = df['date_x'].apply(extract_year)
-    
-    # Fill NaN values
     df['overview'] = df['overview'].fillna('')
     df['genre'] = df['genre'].fillna('')
-    
-    # Remove rows with no title or overview
     df = df[df['names'].notna() & (df['names'] != '')]
-    
-    # Rename columns to match our model
     df = df.rename(columns={'names': 'title'})
+    
+    # Filter and limit
+    df = df[df['score'] > 75].head(count)
+    logger.info(f"Prepared {len(df)} movies for seeding")
     
     return df
 
-def generate_and_save_embeddings(df, batch_size=32):
-    """Generate embeddings for the movies and save them to a file."""
-    print("Initializing embedding model...")
-    embedding_model = MovieEmbedding()
+
+async def seed_database(df: pd.DataFrame, fetch_posters: bool = False, batch_size: int = 32, db_engine=None):
+    """Seed database with movie data, optionally including poster URLs."""
     
-    print(f"Generating embeddings for {len(df)} movies (this may take a while)...")
+    # Use provided engine or default to regular engine
+    selected_engine = db_engine if db_engine is not None else engine
+    
+    # Check if movies already exist
+    with Session(selected_engine) as session:
+        if session.exec(text("SELECT 1 FROM movie LIMIT 1")).first():
+            logger.info("Movies already exist in database. Skipping seeding.")
+            return
+    
+    # Generate embeddings
+    logger.info("Generating embeddings...")
+    embedding_model = MovieEmbedding()
     movies_dict = df.to_dict('records')
     embeddings = embedding_model.generate_embeddings_batch(movies_dict, batch_size)
     
-    # Convert numpy arrays to list for easier serialization
-    embeddings_list = [emb.tolist() for emb in embeddings]
+    # Seed database
+    poster_fetcher = None
+    if fetch_posters:
+        poster_fetcher = MoviePosterFetcher()
+        await poster_fetcher.__aenter__()
     
-    # Prepare data for saving
-    data_to_save = {
-        'embeddings': embeddings_list,
-        'movies': movies_dict,
-        'movie_ids': list(range(1, len(df) + 1))  # Assuming IDs start from 1
-    }
-    
-    # Save embeddings to file
-    print(f"Saving embeddings to {EMBEDDINGS_PATH}")
-    with open(EMBEDDINGS_PATH, 'wb') as f:
-        pickle.dump(data_to_save, f)
-    
-    return embeddings_list
-
-def seed_database(df, embeddings):
-    """Seed the database with movies and their embeddings."""
-    print("Seeding database...")
-    
-    with Session(engine) as session:
-        # Check if movies already exist
-        if session.exec(text("SELECT 1 FROM movie LIMIT 1")).first():
-            print("Movies already seeded in database. Skipping.")
-            return
-        
-        # Prepare movies for database
-        for i, (_, row) in enumerate(df.iterrows()):
-            # Convert embedding to a base64 encoded string
-            embedding_bytes = pickle.dumps(embeddings[i])
-            embedding_str = base64.b64encode(embedding_bytes).decode('utf-8')
+    try:
+        with Session(selected_engine) as session:
+            for i, (_, row) in enumerate(df.iterrows()):
+                logger.info(f"Processing {i+1}/{len(df)}: {row['title']}")
+                
+                # Fetch poster URL if requested
+                poster_url = None
+                if fetch_posters and poster_fetcher:
+                    poster_url = await poster_fetcher.get_poster_url(row['title'], row['year'])
+                    if poster_url:
+                        logger.info(f"Found poster: {poster_url}")
+                    else:
+                        logger.warning(f"No poster found for {row['title']}")
+                    
+                    # Rate limiting
+                    await asyncio.sleep(0.25)
+                
+                # Create movie record
+                embedding_bytes = pickle.dumps(embeddings[i].tolist())
+                embedding_str = base64.b64encode(embedding_bytes).decode('utf-8')
+                
+                movie = Movie(
+                    title=row['title'],
+                    year=row['year'],
+                    genres=row['genre'],
+                    overview=row['overview'],
+                    score=row['score'],
+                    poster_url=poster_url,
+                    embedding_vector=embedding_str
+                )
+                
+                session.add(movie)
+                
+                # Commit in batches
+                if (i + 1) % 10 == 0:
+                    session.commit()
+                    logger.info(f"Committed batch of 10 movies")
             
-            # Create movie object
-            movie = Movie(
-                title=row['title'],
-                year=row['year'],
-                genres=row['genre'],
-                overview=row['overview'],
-                score=row['score'],
-                embedding_vector=embedding_str
-            )
+            # Final commit
+            session.commit()
+            logger.info(f"Successfully seeded {len(df)} movies")
             
-            session.add(movie)
-        
-        # Commit all changes
-        session.commit()
-        print(f"Seeded {len(df)} movies in database.")
+    finally:
+        if poster_fetcher:
+            await poster_fetcher.__aexit__(None, None, None)
 
-def run():
-    """Main function to run the script."""
-    print(f"Starting database seeding process at {datetime.now()}")
+
+async def main():
+    """Main function with command-line argument parsing."""
+    parser = argparse.ArgumentParser(description='Seed database with movie data and embeddings')
+    parser.add_argument(
+        '--count', '-c', 
+        type=int, 
+        default=50, 
+        help='Number of movies to seed (default: 50)'
+    )
+    parser.add_argument(
+        '--posters', '-p', 
+        action='store_true', 
+        help='Fetch poster URLs from TMDB API'
+    )
     
-    # Load and clean dataset
-    df = load_kaggle_dataset()
-    df = clean_dataset(df)
+    parser.add_argument(
+        '--production_db', '-P',
+        action='store_true',
+        help='Use production database'
+    )
     
-    # Limit to a smaller set (for testing)
-    df = df[df['score'] > 75].head(100)
+    args = parser.parse_args()
     
-    # Generate embeddings
-    embeddings = None
-    if EMBEDDINGS_PATH.exists():
-        print(f"Loading existing embeddings from {EMBEDDINGS_PATH}")
-        with open(EMBEDDINGS_PATH, 'rb') as f:
-            data = pickle.load(f)
-            embeddings = data['embeddings']
-    else:
-        embeddings = generate_and_save_embeddings(df)
+    # Determine which database engine to use
+    db_engine = prod_engine if args.production_db else engine
+    db_type = "production" if args.production_db else "development"
+    
+    logger.info(f"Starting database seeding at {datetime.now()}")
+    logger.info(f"Count: {args.count}, Fetch posters: {args.posters}, Database: {db_type}")
+    
+    # Load and prepare data
+    df = load_and_clean_dataset(args.count)
     
     # Seed database
-    seed_database(df, embeddings)
+    await seed_database(df, fetch_posters=args.posters, db_engine=db_engine)
     
-    print(f"Database seeding completed at {datetime.now()}")
+    logger.info(f"Database seeding completed at {datetime.now()}")
+
 
 if __name__ == "__main__":
-    run()
+    asyncio.run(main()) 
