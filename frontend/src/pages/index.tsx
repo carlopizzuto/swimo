@@ -85,7 +85,7 @@ export default function Home() {
         { user_id: userId, movie_id: movie.id, direction: dir, ts: new Date().toISOString() },
       ]);
       
-      fetchMovie();
+      recommendMovie();
     } catch (error) {
       console.error("Error sending swipe:", error);
     }
@@ -136,7 +136,7 @@ export default function Home() {
         {!movie && !isLoading && (
           <div className="text-center">
             <button 
-              onClick={recommendMovie}
+              onClick={fetchMovie}
               className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-full text-lg shadow-lg transform hover:scale-105 transition-all duration-200"
             >
               🎬 Start Discovering Movies
