@@ -9,3 +9,5 @@ kagglehub
 jupyter
 ipykernel
 aiohttp
+passlib[bcrypt]
+python-jose[cryptography]

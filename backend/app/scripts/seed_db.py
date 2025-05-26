@@ -121,7 +121,7 @@ async def seed_database(df: pd.DataFrame, fetch_posters: bool = False, batch_siz
     
     # Check if movies already exist
     with Session(selected_engine) as session:
-        if session.exec(text("SELECT 1 FROM movie LIMIT 1")).first():
+        if session.exec(text("SELECT 1 FROM movies LIMIT 1")).first():
             logger.info("Movies already exist in database. Skipping seeding.")
             return
     
