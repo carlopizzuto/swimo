@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useAuth } from "@/hooks/useAuth";
+import AuthForm from "@/components/AuthForm";
 
 type Movie = {
   id: number;
@@ -19,26 +21,10 @@ type Swipe = {
 };
 
 export default function Home() {
+  const { user, token, logout, isLoading: authLoading } = useAuth();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [swipes, setSwipes] = useState<Swipe[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [userId, setUserId] = useState(1);
-
-  // Handle keyboard events
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (!movie || isLoading) return;
-      
-      if (event.key === "ArrowLeft") {
-        sendSwipe(false); // Dislike
-      } else if (event.key === "ArrowRight") {
-        sendSwipe(true); // Like
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [movie, isLoading]);
 
   const fetchMovie = async () => {
     setIsLoading(true);
@@ -55,7 +41,11 @@ export default function Home() {
   const recommendMovie = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/movies/recommend/`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/movies/recommend/?user_id=${user?.id}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       const movies = await res.json();
       setMovie(movies[0]);
     } catch (error) {
@@ -65,15 +55,18 @@ export default function Home() {
     }
   };
 
-  const sendSwipe = async (dir: boolean) => {
-    if (!movie) return;
+  const sendSwipe = useCallback(async (dir: boolean) => {
+    if (!movie || !user) return;
     
     try {
       await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/swipes/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
         body: JSON.stringify({
-          user_id: userId,
+          user_id: user.id,
           movie_id: movie.id,
           direction: dir,
           ts: new Date().toISOString(),
@@ -82,17 +75,32 @@ export default function Home() {
       
       setSwipes([
         ...swipes,
-        { user_id: userId, movie_id: movie.id, direction: dir, ts: new Date().toISOString() },
+        { user_id: user.id, movie_id: movie.id, direction: dir, ts: new Date().toISOString() },
       ]);
       
       recommendMovie();
     } catch (error) {
       console.error("Error sending swipe:", error);
     }
-  };
+  }, [movie, user, token, swipes, recommendMovie]);
+
+  // Handle keyboard events
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (!movie || isLoading) return;
+      
+      if (event.key === "ArrowLeft") {
+        sendSwipe(false); // Dislike
+      } else if (event.key === "ArrowRight") {
+        sendSwipe(true); // Like
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [movie, isLoading, sendSwipe]);
 
   const newSession = () => {
-    setUserId(userId + 1);
     setSwipes([]);
     setMovie(null);
   };
@@ -107,12 +115,33 @@ export default function Home() {
     return "text-red-500";
   };
 
+  // Show auth form if not authenticated
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    );
+  }
+
+  if (!user || !token) {
+    return <AuthForm />;
+  }
+
   return (
     <div className="h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex flex-col">
       {/* Compact Header */}
-      <header className="text-center py-4">
+      <header className="text-center py-4 relative">
         <h1 className="text-3xl font-bold text-white mb-1">SWIMO</h1>
         <p className="text-sm text-purple-200">Discover Your Next Favorite Movie</p>
+        
+        {/* Logout Button */}
+        <button
+          onClick={logout}
+          className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors"
+        >
+          Logout
+        </button>
       </header>
 
       {/* Main Content */}
@@ -120,7 +149,7 @@ export default function Home() {
         {/* Top Controls */}
         <div className="flex justify-between items-center w-full max-w-md mb-4">
           <div className="text-white text-sm">
-            User: <span className="font-bold text-purple-300">{userId}</span>
+            User: <span className="font-bold text-purple-300">{user?.username}</span>
           </div>
           <button
             onClick={newSession}
