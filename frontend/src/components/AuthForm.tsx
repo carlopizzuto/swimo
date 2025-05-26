@@ -37,16 +37,16 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">SWIMO</h1>
-          <p className="text-purple-200">Discover Your Next Favorite Movie</p>
+          <h1 className="text-4xl font-bold text-orange-900 mb-2 tracking-wider">SWIMO</h1>
+          <p className="text-orange-700 font-medium">Discover Your Next Favorite Movie</p>
         </div>
 
         {/* Auth Form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-white rounded-xl shadow-lg p-8 border border-orange-200">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-800">
               {isLogin ? 'Welcome Back' : 'Create Account'}
@@ -66,7 +66,7 @@ export default function AuthForm() {
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-500"
                 placeholder="Enter your username"
                 disabled={isLoading}
               />
@@ -81,7 +81,7 @@ export default function AuthForm() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-500"
                 placeholder="Enter your password"
                 disabled={isLoading}
               />
@@ -96,7 +96,7 @@ export default function AuthForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
@@ -121,7 +121,7 @@ export default function AuthForm() {
                   setUsername('');
                   setPassword('');
                 }}
-                className="ml-2 text-purple-600 hover:text-purple-700 font-medium"
+                className="ml-2 text-orange-600 hover:text-orange-700 font-medium"
                 disabled={isLoading}
               >
                 {isLogin ? 'Create one' : 'Sign in'}
