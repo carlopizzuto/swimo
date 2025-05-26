@@ -26,6 +26,7 @@ export default function Home() {
   const [swipes, setSwipes] = useState<Swipe[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const fetchMovie = async () => {
@@ -113,6 +114,11 @@ export default function Home() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Reset flip state when movie changes
+  useEffect(() => {
+    setIsFlipped(false);
+  }, [movie]);
 
   const newSession = () => {
     setSwipes([]);
@@ -234,62 +240,158 @@ export default function Home() {
 
         {movie && !isLoading && (
           <div className="max-w-2xl w-full">
-            {/* Movie Card - Fixed Height */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-orange-200 h-96 movie-card">
-              <div className="flex h-full">
-                {/* Movie Poster - Left Side */}
-                <div className="relative bg-gray-100 flex-shrink-0 w-64">
-                  <Image
-                    src={movie.poster_url}
-                    alt={movie.title}
-                    width={256}
-                    height={384}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = "/placeholder-movie.jpg";
-                    }}
-                  />
-                  {/* Score Badge */}
-                  <div className="absolute top-3 right-3 bg-black bg-opacity-80 rounded-md px-2 py-1">
-                    <span className={`font-bold text-xs ${getScoreColor(movie.score)}`}>
-                      {movie.score.toFixed(1)}
-                    </span>
+            {/* Movie Card - Responsive with Flip */}
+            <div className="relative h-96 md:h-96 perspective-1000">
+              <div 
+                className={`relative w-full h-full transition-transform duration-700 transform-style-preserve-3d cursor-pointer ${isFlipped ? 'rotate-y-180' : ''}`}
+                onClick={() => setIsFlipped(!isFlipped)}
+              >
+                {/* Front of Card - Poster + Title (Mobile) / Full Layout (Desktop) */}
+                <div className="absolute inset-0 w-full h-full backface-hidden">
+                  <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-orange-200 h-full">
+                    {/* Mobile Layout */}
+                    <div className="md:hidden h-full flex flex-col">
+                      {/* Poster */}
+                      <div className="relative flex-1 bg-gray-100">
+                        <Image
+                          src={movie.poster_url}
+                          alt={movie.title}
+                          fill
+                          className="object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/placeholder-movie.jpg";
+                          }}
+                        />
+                        {/* Score Badge */}
+                        <div className="absolute top-3 right-3 bg-black bg-opacity-80 rounded-md px-2 py-1">
+                          <span className={`font-bold text-xs ${getScoreColor(movie.score)}`}>
+                            {movie.score.toFixed(1)}
+                          </span>
+                        </div>
+                        {/* Tap to flip indicator */}
+                        <div className="absolute bottom-3 left-3 bg-black bg-opacity-60 rounded-md px-2 py-1">
+                          <span className="text-white text-xs">Tap for details</span>
+                        </div>
+                      </div>
+                      {/* Title Bar */}
+                      <div className="p-4 bg-white">
+                        <h2 className="text-lg font-bold text-gray-900 leading-tight line-clamp-2">
+                          {movie.title}
+                        </h2>
+                        <p className="text-gray-600 text-sm font-medium mt-1">
+                          {movie.year}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Desktop Layout */}
+                    <div className="hidden md:flex h-full">
+                      {/* Movie Poster - Left Side */}
+                      <div className="relative bg-gray-100 flex-shrink-0 w-64">
+                        <Image
+                          src={movie.poster_url}
+                          alt={movie.title}
+                          width={256}
+                          height={384}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = "/placeholder-movie.jpg";
+                          }}
+                        />
+                        {/* Score Badge */}
+                        <div className="absolute top-3 right-3 bg-black bg-opacity-80 rounded-md px-2 py-1">
+                          <span className={`font-bold text-xs ${getScoreColor(movie.score)}`}>
+                            {movie.score.toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Movie Info - Right Side */}
+                      <div className="flex-1 p-6 flex flex-col h-full">
+                        {/* Title and Year */}
+                        <div className="mb-4">
+                          <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight line-clamp-2">
+                            {movie.title}
+                          </h2>
+                          <p className="text-gray-600 text-sm font-medium">
+                            {movie.year}
+                          </p>
+                        </div>
+
+                        {/* Genres */}
+                        <div className="mb-4">
+                          <div className="flex flex-wrap gap-2">
+                            {formatGenres(movie.genres).map((genre, index) => (
+                              <span
+                                key={index}
+                                className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-medium"
+                              >
+                                {genre}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Overview - Scrollable */}
+                        <div className="flex-1 overflow-hidden">
+                          <div className="h-full overflow-y-auto pr-2 scrollbar-thin">
+                            <p className="text-gray-700 text-sm leading-relaxed">
+                              {movie.overview || "No description available."}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {/* Movie Info - Right Side */}
-                <div className="flex-1 p-6 flex flex-col h-full">
-                  {/* Title and Year */}
-                  <div className="mb-4">
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight line-clamp-2">
-                      {movie.title}
-                    </h2>
-                    <p className="text-gray-600 text-sm font-medium">
-                      {movie.year}
-                    </p>
-                  </div>
-
-                  {/* Genres */}
-                  <div className="mb-4">
-                    <div className="flex flex-wrap gap-2">
-                      {formatGenres(movie.genres).map((genre, index) => (
-                        <span
-                          key={index}
-                          className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-medium"
-                        >
-                          {genre}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Overview - Scrollable */}
-                  <div className="flex-1 overflow-hidden">
-                    <div className="h-full overflow-y-auto pr-2 scrollbar-thin">
-                      <p className="text-gray-700 text-sm leading-relaxed">
-                        {movie.overview || "No description available."}
+                {/* Back of Card - Details (Mobile Only) */}
+                <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 md:hidden">
+                  <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-orange-200 h-full p-6 flex flex-col">
+                    {/* Header */}
+                    <div className="mb-4">
+                      <h2 className="text-xl font-bold text-gray-900 mb-2 leading-tight">
+                        {movie.title}
+                      </h2>
+                      <p className="text-gray-600 text-sm font-medium">
+                        {movie.year}
                       </p>
+                      {/* Score */}
+                      <div className="mt-2">
+                        <span className={`font-bold text-lg ${getScoreColor(movie.score)}`}>
+                          ★ {movie.score.toFixed(1)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Genres */}
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-2">
+                        {formatGenres(movie.genres).map((genre, index) => (
+                          <span
+                            key={index}
+                            className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-xs font-medium"
+                          >
+                            {genre}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Overview - Scrollable */}
+                    <div className="flex-1 overflow-hidden">
+                      <div className="h-full overflow-y-auto pr-2">
+                        <p className="text-gray-700 text-sm leading-relaxed">
+                          {movie.overview || "No description available."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Tap to flip back indicator */}
+                    <div className="mt-4 text-center">
+                      <span className="text-gray-500 text-xs">Tap to go back</span>
                     </div>
                   </div>
                 </div>
