@@ -11,7 +11,7 @@ from ..models import User
 from ..schemas import UserCreate, UserLogin, UserResponse, Token
 from ..auth import get_current_user
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(tags=["users"])
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
