@@ -19,7 +19,7 @@ export const useMovies = (userId?: number, token?: string) => {
     }
   };
 
-  const fetchRecommendedMovie = async () => {
+  const fetchRecommendedMovie = useCallback(async () => {
     if (!userId || !token) return;
     
     setIsLoading(true);
@@ -31,7 +31,7 @@ export const useMovies = (userId?: number, token?: string) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId, token, setIsLoading, setMovie]);
 
   const sendSwipe = useCallback(async (direction: boolean) => {
     if (!movie || !userId || !token) return;
@@ -55,7 +55,7 @@ export const useMovies = (userId?: number, token?: string) => {
     } catch (error) {
       console.error("Error sending swipe:", error);
     }
-  }, [movie, userId, token]);
+  }, [movie, userId, token, fetchRecommendedMovie, setSwipes]);
 
   return {
     movie,

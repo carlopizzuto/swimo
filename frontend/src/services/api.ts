@@ -34,5 +34,35 @@ export const swipeApi = {
       }),
     });
     if (!res.ok) throw new Error('Failed to create swipe');
+  },
+
+  getSwipeHistory: async (userId: number, token: string): Promise<Array<Swipe & { movie: Movie }>> => {
+    const res = await fetch(`${API_BASE_URL}/swipes/${userId}/history/`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    if (!res.ok) throw new Error('Failed to fetch swipe history');
+    return res.json();
+  },
+
+  clearSwipeHistory: async (userId: number, token: string): Promise<void> => {
+    const res = await fetch(`${API_BASE_URL}/swipes/${userId}/`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    if (!res.ok) throw new Error('Failed to clear swipe history');
+  },
+
+  deleteSwipe: async (userId: number, movieId: number, token: string): Promise<void> => {
+    const res = await fetch(`${API_BASE_URL}/swipes/${userId}/${movieId}/`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    if (!res.ok) throw new Error('Failed to delete swipe');
   }
 }; 

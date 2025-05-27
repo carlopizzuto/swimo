@@ -33,10 +33,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 flex flex-col">
       {/* Header */}
-      <header className="text-center py-6 relative border-b border-gray-700">
-        <h1 className="text-4xl font-bold text-orange-300 mb-2 tracking-wider">SWIMO</h1>
-        <p className="text-orange-400 font-medium">Discover Your Next Favorite Movie</p>
-        <UserMenu user={user!} onLogout={logout} />
+      <header className="text-center relative border-b border-gray-700">
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col py-6 px-6 items-start">
+            <h1 className="text-4xl font-bold text-orange-300 mb-2 tracking-wider">SWIMO</h1>
+            <p className="text-orange-400 font-medium">Discover Your Next Favorite Movie</p>
+          </div>
+          <UserMenu user={user!} onLogout={logout} />
+        </div>
       </header>
 
       {/* Main Content */}

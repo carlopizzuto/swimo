@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { User } from '@/types';
 
 interface UserMenuProps {
@@ -9,6 +10,7 @@ interface UserMenuProps {
 export default function UserMenu({ user, onLogout }: UserMenuProps) {
   const [showMenu, setShowMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   const getUserInitial = () => {
     return user.username?.charAt(0)?.toUpperCase() || "U";
@@ -46,20 +48,11 @@ export default function UserMenu({ user, onLogout }: UserMenuProps) {
           
           <button
             onClick={() => handleMenuAction(() => {
-              // Placeholder for swipe history
+              router.push('/swipe-history');
             })}
             className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors"
           >
             Swipe History
-          </button>
-          
-          <button
-            onClick={() => handleMenuAction(() => {
-              // Placeholder for clear swipe history
-            })}
-            className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors"
-          >
-            Clear Swipe History
           </button>
           
           <button
