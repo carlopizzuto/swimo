@@ -37,28 +37,28 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-orange-900 mb-2 tracking-wider">SWIMO</h1>
-          <p className="text-orange-700 font-medium">Discover Your Next Favorite Movie</p>
+          <h1 className="text-4xl font-bold text-orange-300 mb-2 tracking-wider">SWIMO</h1>
+          <p className="text-orange-400 font-medium">Discover Your Next Favorite Movie</p>
         </div>
 
         {/* Auth Form */}
-        <div className="bg-white rounded-xl shadow-lg p-8 border border-orange-200">
+        <div className="bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-gray-100">
               {isLogin ? 'Welcome Back' : 'Create Account'}
             </h2>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-400 mt-2">
               {isLogin ? 'Sign in to continue swiping' : 'Join the movie discovery experience'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1">
                 Username
               </label>
               <input
@@ -66,14 +66,14 @@ export default function AuthForm() {
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-100 bg-gray-700 placeholder-gray-400"
                 placeholder="Enter your username"
                 disabled={isLoading}
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1">
                 Password
               </label>
               <input
@@ -81,14 +81,14 @@ export default function AuthForm() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent text-gray-100 bg-gray-700 placeholder-gray-400"
                 placeholder="Enter your password"
                 disabled={isLoading}
               />
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-900 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-sm">
                 {error}
               </div>
             )}
@@ -96,7 +96,7 @@ export default function AuthForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+              className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
@@ -111,7 +111,7 @@ export default function AuthForm() {
 
           {/* Toggle between login and register */}
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-gray-400">
               {isLogin ? "Don't have an account?" : "Already have an account?"}
               <button
                 type="button"
@@ -121,7 +121,7 @@ export default function AuthForm() {
                   setUsername('');
                   setPassword('');
                 }}
-                className="ml-2 text-orange-600 hover:text-orange-700 font-medium"
+                className="ml-2 text-orange-400 hover:text-orange-500 font-medium"
                 disabled={isLoading}
               >
                 {isLogin ? 'Create one' : 'Sign in'}

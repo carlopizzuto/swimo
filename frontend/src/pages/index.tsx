@@ -19,7 +19,7 @@ export default function Home() {
   // Show loading spinner during auth check
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400"></div>
       </div>
     );
@@ -31,11 +31,11 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-red-50 flex flex-col">
+    <div className="min-h-screen bg-gray-900 flex flex-col">
       {/* Header */}
-      <header className="text-center py-6 relative border-b border-orange-200">
-        <h1 className="text-4xl font-bold text-orange-900 mb-2 tracking-wider">SWIMO</h1>
-        <p className="text-orange-700 font-medium">Discover Your Next Favorite Movie</p>
+      <header className="text-center py-6 relative border-b border-gray-700">
+        <h1 className="text-4xl font-bold text-orange-300 mb-2 tracking-wider">SWIMO</h1>
+        <p className="text-orange-400 font-medium">Discover Your Next Favorite Movie</p>
         <UserMenu user={user!} onLogout={logout} />
       </header>
 
@@ -45,7 +45,7 @@ export default function Home() {
           <div className="text-center">
             <button 
               onClick={fetchRandomMovie}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-medium py-4 px-8 rounded-lg text-lg shadow-sm transform hover:scale-105 transition-all duration-200"
+              className="bg-orange-600 hover:bg-orange-700 text-white font-medium py-4 px-8 rounded-lg text-lg shadow-sm transform hover:scale-105 transition-all duration-200"
             >
               Start Discovering Movies
             </button>
@@ -54,8 +54,8 @@ export default function Home() {
 
         {isLoading && (
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mb-3"></div>
-            <p className="text-orange-800 font-medium">Finding your next movie...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400 mb-3"></div>
+            <p className="text-orange-300 font-medium">Finding your next movie...</p>
           </div>
         )}
 
@@ -65,7 +65,7 @@ export default function Home() {
             
             {/* Swipe Count */}
             <div className="mt-4 text-center">
-              <p className="text-orange-600 text-sm font-medium">
+              <p className="text-orange-400 text-sm font-medium">
                 {swipes.length} swipes
               </p>
             </div>
