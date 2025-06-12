@@ -152,7 +152,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                 The Science Behind Your Recommendations
               </h3>
               <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-                Ever wondered how SWIMO knows exactly what you'll love? Here's the magic behind our AI-powered movie matching
+                Ever wondered how SWIMO knows exactly what you&apos;ll love? Here&apos;s the magic behind our AI-powered movie matching
               </p>
             </div>
 
@@ -169,7 +169,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                       <div>
                         <h4 className="text-lg font-bold text-gray-100 mb-2">Movie DNA Analysis</h4>
                         <p className="text-gray-300 text-sm">
-                          We transform every movie's title, genres, and plot into a unique "fingerprint" using AI language models
+                          We transform every movie&apos;s title, genres, and plot into a unique &quot;fingerprint&quot; using AI language models
                         </p>
                         <div className="mt-3 flex flex-wrap gap-2">
                           <span className="bg-blue-700 text-blue-200 px-2 py-1 rounded-full text-xs">Title</span>
@@ -188,7 +188,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                       <div>
                         <h4 className="text-lg font-bold text-gray-100 mb-2">Your Taste Profile</h4>
                         <p className="text-gray-300 text-sm">
-                          Every swipe builds your personal taste profile by averaging the "DNA" of movies you love
+                          Every swipe builds your personal taste profile by averaging the &quot;DNA&quot; of movies you love
                         </p>
                         <div className="mt-3 flex items-center gap-2 text-sm">
                           <span className="text-emerald-400">👍 Liked movies</span>
@@ -245,7 +245,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                     <div className="bg-gray-800 rounded-lg p-4 border-l-4 border-green-400">
                       <h5 className="font-bold text-gray-100 mb-2">🎯 Cosine Similarity</h5>
                       <p className="text-gray-300 text-sm">
-                        We calculate the angle between your profile and each movie's vector - smaller angles mean better matches!
+                        We calculate the angle between your profile and each movie&apos;s vector - smaller angles mean better matches!
                       </p>
                     </div>
                     
@@ -265,7 +265,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
                   </div>
                   <p className="text-gray-300 text-sm">
                     Our system processes over <span className="text-orange-400 font-bold">384 dimensions</span> of movie data for each recommendation - 
-                    that's like considering 384 different aspects of every movie simultaneously!
+                    that&apos;s like considering 384 different aspects of every movie simultaneously!
                   </p>
                 </div>
               </div>
@@ -292,7 +292,7 @@ export default function LandingPage({ onGetStarted }: LandingPageProps) {
               Ready to Find Your Next Favorite Movie?
             </h3>
             <p className="text-xl text-orange-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of movie lovers who've already discovered their perfect matches
+              Join thousands of movie lovers who&apos;ve already discovered their perfect matches
             </p>
             <button
               onClick={onGetStarted}
