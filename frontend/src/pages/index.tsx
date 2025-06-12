@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import { useAuth } from "@/hooks/useAuth";
 import { useMovies } from "@/hooks/useMovies";
 import { useKeyboard } from "@/hooks/useKeyboard";
 import AuthForm from "@/components/AuthForm";
 import UserMenu from "@/components/UserMenu";
 import MovieCard from "@/components/MovieCard";
+import LandingPage from "@/components/LandingPage";
 
 export default function Home() {
   const { user, token, logout, isLoading: authLoading } = useAuth();
   const { movie, swipes, isLoading, fetchRandomMovie, sendSwipe } = useMovies(user?.id, token || undefined);
+  const [showAuth, setShowAuth] = useState(false);
 
   // Handle keyboard events for swiping
   useKeyboard({
@@ -25,9 +28,14 @@ export default function Home() {
     );
   }
 
-  // Show auth form if not authenticated
+  // Show landing page if not authenticated and auth form not requested
+  if (!user && !showAuth) {
+    return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+  }
+
+  // Show auth form if not authenticated but auth form was requested
   if (!user || !token) {
-    return <AuthForm />;
+    return <AuthForm onBack={!user ? () => setShowAuth(false) : undefined} />;
   }
 
   return (

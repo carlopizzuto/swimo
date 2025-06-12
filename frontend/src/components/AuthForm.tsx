@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
-export default function AuthForm() {
+interface AuthFormProps {
+  onBack?: () => void;
+}
+
+export default function AuthForm({ onBack }: AuthFormProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -41,8 +45,23 @@ export default function AuthForm() {
       <div className="max-w-md w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-orange-300 mb-2 tracking-wider">SWIMO</h1>
-          <p className="text-orange-400 font-medium">Discover Your Next Favorite Movie</p>
+          <div className="flex items-center justify-center mb-4">
+            {onBack && (
+              <button
+                onClick={onBack}
+                className="absolute left-0 text-gray-400 hover:text-orange-400 transition-colors duration-200"
+                title="Back to landing page"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+            <div>
+              <h1 className="text-4xl font-bold text-orange-300 mb-2 tracking-wider">SWIMO</h1>
+              <p className="text-orange-400 font-medium">Discover Your Next Favorite Movie</p>
+            </div>
+          </div>
         </div>
 
         {/* Auth Form */}
