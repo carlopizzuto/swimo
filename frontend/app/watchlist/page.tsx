@@ -78,7 +78,8 @@ export default function WatchlistPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="flex-1 flex flex-col px-4 py-8 overflow-y-auto">
+      <div className="container mx-auto max-w-6xl">
       <div className="text-center mb-8">
         <div className="w-24 h-24 bg-green-600/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-600/30">
           <Heart className="w-12 h-12 text-green-400" />
@@ -185,6 +186,7 @@ export default function WatchlistPage() {
           </Button>
         </div>
       )}
+      </div>
     </div>
   )
 }

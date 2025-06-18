@@ -116,7 +116,8 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="flex-1 flex flex-col px-4 py-8 overflow-y-auto">
+      <div className="container mx-auto max-w-6xl">
       <div className="text-center mb-8">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">Search Movies</h1>
         <p className="text-gray-400">Discover movies from our collection</p>
@@ -210,6 +211,7 @@ export default function SearchPage() {
           <p className="text-gray-400 mb-4">Try a different search term or load more movies</p>
         </div>
       )}
+      </div>
     </div>
   )
 }

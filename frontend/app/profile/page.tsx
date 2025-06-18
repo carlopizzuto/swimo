@@ -81,8 +81,8 @@ export default function ProfilePage() {
   const likeRate = totalSwipes > 0 ? Math.round((likedMovies.length / totalSwipes) * 100) : 0
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="space-y-8">
+    <div className="flex-1 flex flex-col px-4 py-8 overflow-y-auto">
+      <div className="container mx-auto max-w-4xl space-y-8">
         {/* User Profile Header */}
         <Card className="bg-gray-800 border-gray-700">
           <CardHeader className="text-center">
