@@ -176,16 +176,18 @@ export default function MovieCard({ movie, onSwipe, isActive }: MovieCardProps) 
           {/* Left side - Poster */}
           <div className="w-1/3 relative">
             <Image
-              src={movie.poster || "/placeholder.svg"}
+              src={movie.poster_url || "/placeholder.svg"}
               alt={movie.title}
               fill
               className="object-cover"
               sizes="400px"
             />
-            <div className="absolute top-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full flex items-center gap-1">
-              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm font-semibold">{movie.rating}</span>
-            </div>
+            {movie.score && (
+              <div className="absolute top-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full flex items-center gap-1">
+                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                <span className="text-sm font-semibold">{movie.score.toFixed(1)}</span>
+              </div>
+            )}
           </div>
 
           {/* Right side - Details */}
@@ -194,30 +196,30 @@ export default function MovieCard({ movie, onSwipe, isActive }: MovieCardProps) 
               <h2 className="text-3xl font-bold text-white mb-4">{movie.title}</h2>
 
               <div className="flex items-center gap-6 text-gray-400 mb-6">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  <span>{movie.year}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  <span>{movie.duration}</span>
-                </div>
+                {movie.year && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-5 h-5" />
+                    <span>{movie.year}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="flex flex-wrap gap-2 mb-6">
-                {movie.genres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm font-medium border border-blue-600/30"
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
+              {movie.genres && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {movie.genres.split(',').map((genre, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-blue-600/20 text-blue-400 rounded-full text-sm font-medium border border-blue-600/30"
+                    >
+                      {genre.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>
-              <p className="text-gray-300 text-lg leading-relaxed">{movie.description}</p>
+              <p className="text-gray-300 text-lg leading-relaxed">{movie.overview || 'No description available.'}</p>
             </div>
           </div>
         </div>
@@ -232,7 +234,7 @@ export default function MovieCard({ movie, onSwipe, isActive }: MovieCardProps) 
           <div className="absolute inset-0 backface-hidden">
             <div className="relative w-full h-full">
               <Image
-                src={movie.poster || "/placeholder.svg"}
+                src={movie.poster_url || "/placeholder.svg"}
                 alt={movie.title}
                 fill
                 className="object-cover rounded-2xl"
@@ -240,10 +242,12 @@ export default function MovieCard({ movie, onSwipe, isActive }: MovieCardProps) 
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent rounded-2xl" />
 
-              <div className="absolute top-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full flex items-center gap-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-semibold">{movie.rating}</span>
-              </div>
+              {movie.score && (
+                <div className="absolute top-4 right-4 bg-black/70 text-white px-2 py-1 rounded-full flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm font-semibold">{movie.score.toFixed(1)}</span>
+                </div>
+              )}
 
               <div className="absolute bottom-6 left-6 right-6">
                 <h2 className="text-2xl font-bold text-white mb-2">{movie.title}</h2>
@@ -258,30 +262,30 @@ export default function MovieCard({ movie, onSwipe, isActive }: MovieCardProps) 
               <h2 className="text-2xl font-bold text-white mb-4">{movie.title}</h2>
 
               <div className="flex items-center gap-4 text-gray-400 mb-4">
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm">{movie.year}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
-                  <span className="text-sm">{movie.duration}</span>
-                </div>
+                {movie.year && (
+                  <div className="flex items-center gap-1">
+                    <Calendar className="w-4 h-4" />
+                    <span className="text-sm">{movie.year}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="flex flex-wrap gap-2 mb-4">
-                {movie.genres.map((genre) => (
-                  <span
-                    key={genre}
-                    className="px-2 py-1 bg-blue-600/20 text-blue-400 rounded-full text-xs font-medium border border-blue-600/30"
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
+              {movie.genres && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {movie.genres.split(',').map((genre, index) => (
+                    <span
+                      key={index}
+                      className="px-2 py-1 bg-blue-600/20 text-blue-400 rounded-full text-xs font-medium border border-blue-600/30"
+                    >
+                      {genre.trim()}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div>
-              <p className="text-gray-300 text-sm leading-relaxed mb-4">{movie.description}</p>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">{movie.overview || 'No description available.'}</p>
               <p className="text-gray-500 text-xs">Swipe down to see poster</p>
             </div>
           </div>

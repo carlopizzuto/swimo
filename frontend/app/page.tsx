@@ -1,80 +1,116 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useRouter } from "next/navigation"
 import MovieCard from "@/components/MovieCard"
 import type { Movie } from "@/lib/types"
-import { getMovies } from "@/lib/movies"
+import { api } from "@/lib/api"
+import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
 
 export default function Home() {
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
+  const router = useRouter()
   const [movies, setMovies] = useState<Movie[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [likedMovies, setLikedMovies] = useState<string[]>([])
-  const [dislikedMovies, setDislikedMovies] = useState<string[]>([])
-  const [watchlistMovies, setWatchlistMovies] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth')
+      return
+    }
+  }, [authLoading, isAuthenticated, router])
+
+  // Load movies (recommendations if user has swipe history, otherwise random)
   useEffect(() => {
     const loadMovies = async () => {
-      const movieData = await getMovies()
-      setMovies(movieData)
-      setIsLoading(false)
+      if (!user) return
+
+      setIsLoading(true)
+      setError(null)
+      
+      try {
+        // Try to get recommendations first
+        let movieData: Movie[] = []
+        try {
+          movieData = await api.movies.getRecommendations(user.id, 10)
+        } catch (error) {
+          console.log('No recommendations available, falling back to random movies')
+          // If recommendations fail (e.g., no swipe history), get random movies
+          for (let i = 0; i < 10; i++) {
+            try {
+              const randomMovie = await api.movies.getRandomMovie()
+              // Avoid duplicates
+              if (!movieData.find(m => m.id === randomMovie.id)) {
+                movieData.push(randomMovie)
+              }
+            } catch (e) {
+              console.error('Failed to fetch random movie:', e)
+            }
+          }
+        }
+        
+        setMovies(movieData)
+        setCurrentIndex(0)
+      } catch (error) {
+        console.error('Failed to load movies:', error)
+        setError('Failed to load movies. Please try again.')
+      } finally {
+        setIsLoading(false)
+      }
     }
-    loadMovies()
 
-    // Load preferences from localStorage
-    const saved = localStorage.getItem("moviePreferences")
-    if (saved) {
-      const { liked, disliked, watchlist } = JSON.parse(saved)
-      setLikedMovies(liked || [])
-      setDislikedMovies(disliked || [])
-      setWatchlistMovies(watchlist || [])
+    if (user) {
+      loadMovies()
     }
-  }, [])
+  }, [user])
 
-  const savePreferences = (liked: string[], disliked: string[], watchlist: string[]) => {
-    localStorage.setItem("moviePreferences", JSON.stringify({ liked, disliked, watchlist }))
-  }
+  const handleSwipe = useCallback(async (direction: "left" | "right" | "up") => {
+    if (!user || currentIndex >= movies.length) return
 
-  const handleLike = useCallback(() => {
-    if (currentIndex < movies.length) {
-      const movieId = movies[currentIndex].id
-      const newLiked = [...likedMovies, movieId]
-      setLikedMovies(newLiked)
-      savePreferences(newLiked, dislikedMovies, watchlistMovies)
+    const currentMovie = movies[currentIndex]
+    const isLike = direction === "right"
+    const isWatchlist = direction === "up"
+
+    try {
+      // For "up" swipe (watchlist), we'll treat it as a like for now
+      // since the backend doesn't have a separate watchlist concept
+      await api.swipes.createSwipe({
+        user_id: user.id,
+        movie_id: currentMovie.id,
+        direction: isLike || isWatchlist, // both like and watchlist are "true"
+      })
+
+      // Move to next movie
+      setCurrentIndex(currentIndex + 1)
+
+      // If we're running low on movies, try to load more recommendations
+      if (currentIndex + 2 >= movies.length) {
+        try {
+          const moreMovies = await api.movies.getRecommendations(user.id, 5)
+          // Filter out movies we've already seen
+          const seenMovieIds = new Set(movies.map(m => m.id))
+          const newMovies = moreMovies.filter(m => !seenMovieIds.has(m.id))
+          if (newMovies.length > 0) {
+            setMovies(prev => [...prev, ...newMovies])
+          }
+        } catch (error) {
+          console.log('Could not load more recommendations')
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save swipe:', error)
+      // Still move to next movie even if save failed
       setCurrentIndex(currentIndex + 1)
     }
-  }, [currentIndex, movies, likedMovies, dislikedMovies, watchlistMovies])
+  }, [user, currentIndex, movies])
 
-  const handleDislike = useCallback(() => {
-    if (currentIndex < movies.length) {
-      const movieId = movies[currentIndex].id
-      const newDisliked = [...dislikedMovies, movieId]
-      setDislikedMovies(newDisliked)
-      savePreferences(likedMovies, newDisliked, watchlistMovies)
-      setCurrentIndex(currentIndex + 1)
-    }
-  }, [currentIndex, movies, likedMovies, dislikedMovies, watchlistMovies])
-
-  const handleWatchlist = useCallback(() => {
-    if (currentIndex < movies.length) {
-      const movieId = movies[currentIndex].id
-      const newWatchlist = [...watchlistMovies, movieId]
-      setWatchlistMovies(newWatchlist)
-      savePreferences(likedMovies, dislikedMovies, newWatchlist)
-      setCurrentIndex(currentIndex + 1)
-    }
-  }, [currentIndex, movies, likedMovies, dislikedMovies, watchlistMovies])
-
-  const handleSwipe = (direction: "left" | "right" | "up") => {
-    if (direction === "right") {
-      handleLike()
-    } else if (direction === "left") {
-      handleDislike()
-    } else if (direction === "up") {
-      handleWatchlist()
-    }
-  }
+  const handleLike = useCallback(() => handleSwipe("right"), [handleSwipe])
+  const handleDislike = useCallback(() => handleSwipe("left"), [handleSwipe])
+  const handleWatchlist = useCallback(() => handleSwipe("up"), [handleSwipe])
 
   // Keyboard controls for desktop
   useEffect(() => {
@@ -91,6 +127,34 @@ export default function Home() {
     window.addEventListener("keydown", handleKeyPress)
     return () => window.removeEventListener("keydown", handleKeyPress)
   }, [handleLike, handleDislike, handleWatchlist])
+
+  // Show loading spinner while auth is loading
+  if (authLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+
+  // Don't render anything if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null
+  }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center text-white">
+          <h2 className="text-2xl font-bold mb-4">Error</h2>
+          <p className="text-gray-400 mb-6">{error}</p>
+          <Button onClick={() => window.location.reload()} className="bg-blue-600 hover:bg-blue-700">
+            Try Again
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -128,8 +192,15 @@ export default function Home() {
               <div className="text-center text-white">
                 <h2 className="text-2xl font-bold mb-4">No more movies!</h2>
                 <p className="text-gray-400 mb-6">You've seen all available movies</p>
-                <Button onClick={() => setCurrentIndex(0)} className="bg-blue-600 hover:bg-blue-700">
-                  Start Over
+                <Button 
+                  onClick={() => {
+                    setCurrentIndex(0)
+                    setMovies([])
+                    // This will trigger the useEffect to reload movies
+                  }} 
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Get More Recommendations
                 </Button>
               </div>
             </div>
