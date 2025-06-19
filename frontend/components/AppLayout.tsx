@@ -23,7 +23,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (isAuthenticated === false && pathname !== "/auth") {
+    if (isAuthenticated === false && pathname !== "/auth" && pathname !== "/splash") {
       router.push("/auth")
     }
   }, [isAuthenticated, pathname, router])
@@ -37,8 +37,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     )
   }
 
-  // Show auth page without navigation
-  if (pathname === "/auth") {
+  // Show auth and splash pages without navigation
+  if (pathname === "/auth" || pathname === "/splash") {
     return <>{children}</>
   }
 

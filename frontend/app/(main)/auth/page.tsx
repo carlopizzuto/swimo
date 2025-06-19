@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -64,7 +65,11 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">SWIMO</h1>
+          <Link href="/splash" className="inline-block">
+            <h1 className="text-4xl font-bold text-white mb-2 hover:text-orange-500 transition-colors cursor-pointer">
+              SWIMO
+            </h1>
+          </Link>
           <p className="text-gray-400">Sign in to discover your next favorite movie</p>
         </div>
 
