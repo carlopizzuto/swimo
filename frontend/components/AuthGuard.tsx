@@ -30,12 +30,14 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     if (!isInitialized) return
 
     // Only redirect if trying to access a protected route without authentication
+    // BUT allow unauthenticated users to visit splash and auth pages
     if (!isAuthenticated && !isPublicRoute) {
       router.replace(ROUTES.AUTH)
       return
     }
 
     // Only redirect authenticated users away from auth page (not splash)
+    // Let authenticated users visit splash if they want to
     if (isAuthenticated && pathname === ROUTES.AUTH) {
       router.replace(ROUTES.DISCOVER)
       return
