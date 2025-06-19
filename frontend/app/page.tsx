@@ -8,6 +8,13 @@ import { api } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
 
+const RECOMMENDATION_CONFIG = {
+  INITIAL_BATCH: 5,
+  REFILL_BATCH: 4,
+  REFILL_TRIGGER: 2, // Load more when this many movies left
+  FALLBACK_BATCH: 3, // Number of random movies to get as fallback
+} as const
+
 export default function Home() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth()
   const router = useRouter()
@@ -36,11 +43,11 @@ export default function Home() {
         // Try to get recommendations first
         let movieData: Movie[] = []
         try {
-          movieData = await api.movies.getRecommendations(user.id, 10)
+          movieData = await api.movies.getRecommendations(user.id, RECOMMENDATION_CONFIG.INITIAL_BATCH)
         } catch (error) {
           console.log('No recommendations available, falling back to random movies')
           // If recommendations fail (e.g., no swipe history), get random movies
-          for (let i = 0; i < 10; i++) {
+          for (let i = 0; i < RECOMMENDATION_CONFIG.FALLBACK_BATCH; i++) {
             try {
               const randomMovie = await api.movies.getRandomMovie()
               // Avoid duplicates
@@ -88,9 +95,9 @@ export default function Home() {
       setCurrentIndex(currentIndex + 1)
 
       // If we're running low on movies, try to load more recommendations
-      if (currentIndex + 2 >= movies.length) {
+      if (currentIndex + RECOMMENDATION_CONFIG.REFILL_TRIGGER >= movies.length) {
         try {
-          const moreMovies = await api.movies.getRecommendations(user.id, 5)
+          const moreMovies = await api.movies.getRecommendations(user.id, RECOMMENDATION_CONFIG.REFILL_BATCH)
           // Filter out movies we've already seen
           const seenMovieIds = new Set(movies.map(m => m.id))
           const newMovies = moreMovies.filter(m => !seenMovieIds.has(m.id))
