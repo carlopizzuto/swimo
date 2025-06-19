@@ -34,17 +34,28 @@ def recommend_movies(user_id: int = 2, top_n: int = 5, session=Depends(get_sessi
     Get movie recommendations based on user's swipe history.
     Uses database-stored embeddings only (no pickle files).
     """
-    # Get user's swipe history
-    liked_query = select(Swipe.movie_id).where(Swipe.user_id == user_id, Swipe.direction == True)
+    # Get user's swipe history - get distinct movie IDs only
+    liked_query = select(Swipe.movie_id).where(Swipe.user_id == user_id, Swipe.direction == True).distinct()
     liked_movie_ids = session.exec(liked_query).all()
     
-    disliked_query = select(Swipe.movie_id).where(Swipe.user_id == user_id, Swipe.direction == False)
+    disliked_query = select(Swipe.movie_id).where(Swipe.user_id == user_id, Swipe.direction == False).distinct()
     disliked_movie_ids = session.exec(disliked_query).all()
     
-    # If user has no likes, return random movies
+    # If user has no likes, return random movies (excluding all swiped movies)
     if not liked_movie_ids:
-        ids = session.exec(select(Movie.id)).all()
-        recommended_ids = [choice(ids) for _ in range(min(top_n, len(ids)))]
+        # Get all swiped movie IDs (both liked and disliked) to exclude them
+        all_swiped_query = select(Swipe.movie_id).where(Swipe.user_id == user_id).distinct()
+        all_swiped_movie_ids = set(session.exec(all_swiped_query).all())
+        
+        # Get all available movie IDs
+        all_movie_ids = session.exec(select(Movie.id)).all()
+        available_movie_ids = [mid for mid in all_movie_ids if mid not in all_swiped_movie_ids]
+        
+        # If no movies left unseen, return empty list
+        if not available_movie_ids:
+            return []
+            
+        recommended_ids = [choice(available_movie_ids) for _ in range(min(top_n, len(available_movie_ids)))]
     else:
         # Get recommendations using the database-only recommender
         recommender = get_recommender()

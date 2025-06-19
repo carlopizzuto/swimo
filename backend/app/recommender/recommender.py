@@ -72,7 +72,13 @@ class MovieRecommender:
         if not liked_indices:
             # If no valid liked movies, return random recommendations
             import random
-            return random.sample(self.movie_ids, min(top_n, len(self.movie_ids)))
+            # Exclude already seen movies even for random recommendations
+            all_seen_movie_ids = set(liked_movie_ids)
+            if disliked_movie_ids:
+                all_seen_movie_ids.update(disliked_movie_ids)
+            
+            available_movie_ids = [mid for mid in self.movie_ids if mid not in all_seen_movie_ids]
+            return random.sample(available_movie_ids, min(top_n, len(available_movie_ids)))
         
         # Average the embeddings of liked movies
         liked_embeddings = [self.embeddings[idx] for idx in liked_indices]
@@ -90,9 +96,14 @@ class MovieRecommender:
         # Calculate similarity scores
         similarities = cosine_similarity(user_profile, self.embeddings).flatten()
         
+        # Create a set of all seen movie IDs for efficient lookup
+        all_seen_movie_ids = set(liked_movie_ids)
+        if disliked_movie_ids:
+            all_seen_movie_ids.update(disliked_movie_ids)
+        
         # Create a list of (movie_id, similarity) tuples, excluding already seen movies
-        seen_indices = liked_indices + (disliked_indices if disliked_movie_ids else [])
-        movie_scores = [(self.movie_ids[i], similarities[i]) for i in range(len(similarities)) if i not in seen_indices]
+        movie_scores = [(self.movie_ids[i], similarities[i]) for i in range(len(similarities)) 
+                       if self.movie_ids[i] not in all_seen_movie_ids]
         
         # Sort by similarity and return top_n
         movie_scores.sort(key=lambda x: x[1], reverse=True)
