@@ -12,22 +12,18 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Heart, X, Calendar, Star, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { ROUTES } from "@/lib/constants"
 import Image from "next/image"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default function ProfilePage() {
-  const { user, isAuthenticated, logout } = useAuth()
+  const { user, logout } = useAuth()
   const router = useRouter()
   const [swipeHistory, setSwipeHistory] = useState<SwipeHistoryItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  // Redirect to auth if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth')
-      return
-    }
-  }, [isAuthenticated, router])
 
   // Load swipe history
   useEffect(() => {
@@ -55,7 +51,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     logout()
-    router.push('/auth')
+    router.push(ROUTES.AUTH)
   }
 
   const handleClearHistory = async () => {
@@ -70,7 +66,7 @@ export default function ProfilePage() {
     }
   }
 
-  if (!isAuthenticated || !user) {
+  if (!user) {
     return null
   }
 

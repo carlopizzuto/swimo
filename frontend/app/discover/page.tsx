@@ -1,35 +1,23 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useRouter } from "next/navigation"
 import MovieCard from "@/components/MovieCard"
+import LoadingSpinner from "@/components/LoadingSpinner"
 import type { Movie } from "@/lib/types"
 import { api } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
+import { RECOMMENDATION_CONFIG } from "@/lib/constants"
 
-const RECOMMENDATION_CONFIG = {
-  INITIAL_BATCH: 5,
-  REFILL_BATCH: 4,
-  REFILL_TRIGGER: 2, // Load more when this many movies left
-  FALLBACK_BATCH: 3, // Number of random movies to get as fallback
-} as const
+// Force dynamic rendering to prevent build issues
+export const dynamic = 'force-dynamic'
 
 export default function Home() {
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth()
-  const router = useRouter()
+  const { user } = useAuth()
   const [movies, setMovies] = useState<Movie[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  // Redirect to auth if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.replace('/auth')
-      return
-    }
-  }, [authLoading, isAuthenticated, router])
 
   // Load movies (recommendations if user has swipe history, otherwise random)
   useEffect(() => {
@@ -135,20 +123,6 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handleKeyPress)
   }, [handleLike, handleDislike, handleWatchlist])
 
-  // Show loading spinner while auth is loading
-  if (authLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    )
-  }
-
-  // Don't render anything if not authenticated (will redirect)
-  if (!isAuthenticated) {
-    return null
-  }
-
   if (error) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -164,11 +138,7 @@ export default function Home() {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    )
+    return <LoadingSpinner className="flex-1" />
   }
 
   return (

@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { Search, Calendar, Star } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -12,21 +11,15 @@ import { api } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
 import Image from "next/image"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default function SearchPage() {
-  const { user, isAuthenticated } = useAuth()
-  const router = useRouter()
+  const { user } = useAuth()
   const [movies, setMovies] = useState<Movie[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([])
   const [isLoading, setIsLoading] = useState(true)
-
-  // Redirect to auth if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth')
-      return
-    }
-  }, [isAuthenticated, router])
 
   // Load movies (get a batch of random movies for searching)
   useEffect(() => {
@@ -101,10 +94,6 @@ export default function SearchPage() {
     } catch (error) {
       console.error('Failed to load more movies:', error)
     }
-  }
-
-  if (!isAuthenticated) {
-    return null
   }
 
   if (isLoading) {

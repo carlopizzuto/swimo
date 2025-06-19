@@ -10,6 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { ROUTES } from "@/lib/constants"
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false)
@@ -26,7 +30,7 @@ export default function AuthPage() {
 
     try {
       await login(loginForm)
-      router.push("/")
+      // AuthGuard will handle the redirect automatically
     } catch (error) {
       setError("Invalid username or password")
     } finally {
@@ -53,7 +57,7 @@ export default function AuthPage() {
 
     try {
       await register({ username: registerForm.username, password: registerForm.password })
-      router.push("/")
+      // AuthGuard will handle the redirect automatically
     } catch (error) {
       setError("Username already exists or registration failed")
     } finally {
@@ -65,7 +69,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/splash" className="inline-block">
+          <Link href={ROUTES.SPLASH} className="inline-block">
             <h1 className="text-4xl font-bold text-white mb-2 hover:text-orange-500 transition-colors cursor-pointer">
               SWIMO
             </h1>

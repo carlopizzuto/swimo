@@ -2,8 +2,9 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import AppLayout from "@/components/AppLayout"
 import { AuthProvider } from "@/contexts/AuthContext"
+import AuthGuard from "@/components/AuthGuard"
+import RouteHandler from "@/components/RouteHandler"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     "Swipe to discover your next favorite movie. Find movies you'll love with our intuitive matching system.",
   keywords: "movies, film, recommendations, swipe, discover, entertainment",
   authors: [{ name: "SWIMO Team" }],
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -31,7 +32,11 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-gray-900`}>
         <AuthProvider>
-          <AppLayout>{children}</AppLayout>
+          <AuthGuard>
+            <RouteHandler>
+              {children}
+            </RouteHandler>
+          </AuthGuard>
         </AuthProvider>
       </body>
     </html>

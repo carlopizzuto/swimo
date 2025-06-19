@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { Home, Search, User, Bookmark, LogOut } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { Button } from "@/components/ui/button"
+import { ROUTES } from "@/lib/constants"
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -13,7 +14,7 @@ export default function Navigation() {
 
   const handleLogout = () => {
     logout()
-    router.push('/auth')
+    router.push(ROUTES.AUTH)
   }
 
   // Don't show navigation if user is not authenticated
@@ -22,10 +23,10 @@ export default function Navigation() {
   }
 
   const navItems = [
-    { href: "/", icon: Home, label: "Discover" },
-    { href: "/search", icon: Search, label: "Search" },
-    { href: "/watchlist", icon: Bookmark, label: "Watchlist" },
-    { href: "/profile", icon: User, label: "Profile" },
+    { href: ROUTES.DISCOVER, icon: Home, label: "Discover" },
+    { href: ROUTES.SEARCH, icon: Search, label: "Search" },
+    { href: ROUTES.WATCHLIST, icon: Bookmark, label: "Watchlist" },
+    { href: ROUTES.PROFILE, icon: User, label: "Profile" },
   ]
 
   return (
@@ -35,7 +36,7 @@ export default function Navigation() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <Link href="/" className="text-2xl font-bold text-white">
+              <Link href={ROUTES.DISCOVER} className="text-2xl font-bold text-white">
                 SWIMO
               </Link>
             </div>

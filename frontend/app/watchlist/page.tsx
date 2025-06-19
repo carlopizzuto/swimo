@@ -11,22 +11,18 @@ import { AlertCircle } from "lucide-react"
 import type { SwipeHistoryItem } from "@/lib/types"
 import { api } from "@/lib/api"
 import { useAuth } from "@/contexts/AuthContext"
+import { ROUTES } from "@/lib/constants"
 import Image from "next/image"
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default function WatchlistPage() {
-  const { user, isAuthenticated } = useAuth()
+  const { user } = useAuth()
   const router = useRouter()
   const [likedMovies, setLikedMovies] = useState<SwipeHistoryItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  // Redirect to auth if not authenticated
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.push('/auth')
-      return
-    }
-  }, [isAuthenticated, router])
 
   // Load liked movies from swipe history
   useEffect(() => {
@@ -63,10 +59,6 @@ export default function WatchlistPage() {
       console.error('Failed to remove movie:', error)
       setError('Failed to remove movie from liked list')
     }
-  }
-
-  if (!isAuthenticated) {
-    return null
   }
 
   if (isLoading) {
@@ -179,7 +171,7 @@ export default function WatchlistPage() {
             <p>Desktop: Press → arrow key or swipe up for watchlist</p>
           </div>
           <Button 
-            onClick={() => router.push('/')}
+            onClick={() => router.push(ROUTES.DISCOVER)}
             className="mt-4 bg-blue-600 hover:bg-blue-700"
           >
             Start Swiping
