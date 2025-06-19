@@ -29,14 +29,14 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   useEffect(() => {
     if (!isInitialized) return
 
-    // If not authenticated and trying to access protected route
+    // Only redirect if trying to access a protected route without authentication
     if (!isAuthenticated && !isPublicRoute) {
       router.replace(ROUTES.AUTH)
       return
     }
 
-    // If authenticated and on public route (except root), redirect to main app
-    if (isAuthenticated && (pathname === ROUTES.AUTH || pathname === ROUTES.SPLASH)) {
+    // Only redirect authenticated users away from auth page (not splash)
+    if (isAuthenticated && pathname === ROUTES.AUTH) {
       router.replace(ROUTES.DISCOVER)
       return
     }
