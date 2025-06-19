@@ -1,26 +1,26 @@
 "use client"
 
-import { useEffect } from 'react'
+import SplashScreen from '@/components/SplashScreen'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { ROUTES } from '@/lib/constants'
-import LoadingSpinner from '@/components/LoadingSpinner'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
 export default function RootPage() {
   const router = useRouter()
-  const { isLoading } = useAuth()
+  const { isAuthenticated } = useAuth()
 
-  useEffect(() => {
-    if (!isLoading) {
-      // Always redirect to splash, regardless of auth status
-      // Let the splash page handle the user flow naturally
-      router.replace(ROUTES.SPLASH)
+  const handleEnterApp = () => {
+    if (isAuthenticated) {
+      // User is already logged in, go straight to discover
+      router.push(ROUTES.DISCOVER)
+    } else {
+      // User needs to authenticate first
+      router.push(ROUTES.AUTH)
     }
-  }, [isLoading, router])
+  }
 
-  // Show loading while auth is initializing
-  return <LoadingSpinner />
+  return <SplashScreen onEnter={handleEnterApp} />
 } 

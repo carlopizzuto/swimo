@@ -1,7 +1,6 @@
 // Route definitions
 export const ROUTES = {
   HOME: "/",
-  SPLASH: "/splash", 
   AUTH: "/auth",
   DISCOVER: "/discover",  // Main app content
   PROFILE: "/profile",
@@ -9,8 +8,9 @@ export const ROUTES = {
   WATCHLIST: "/watchlist",
 } as const
 
+// Only auth page is public now, everything else requires authentication
 export const PUBLIC_ROUTES = [
-  ROUTES.SPLASH,
+  ROUTES.HOME,  // Root page shows splash screen
   ROUTES.AUTH,
 ] as const
 

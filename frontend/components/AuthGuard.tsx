@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
 import LoadingSpinner from "./LoadingSpinner"
-import { PUBLIC_ROUTES, ROUTES } from "@/lib/constants"
+import { ROUTES } from "@/lib/constants"
 
 interface AuthGuardProps {
   children: React.ReactNode
@@ -14,38 +13,30 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { isAuthenticated, isLoading } = useAuth()
-  const [isInitialized, setIsInitialized] = useState(false)
 
-  const isPublicRoute = PUBLIC_ROUTES.includes(pathname as any)
+  // Don't apply any auth logic to the root page - let it handle its own flow
+  if (pathname === ROUTES.HOME) {
+    return <>{children}</>
+  }
 
-  // Wait for auth context to initialize
-  useEffect(() => {
-    if (!isLoading) {
-      setIsInitialized(true)
-    }
-  }, [isLoading])
+  // Routes that require authentication
+  const protectedRoutes = [ROUTES.DISCOVER, ROUTES.SEARCH, ROUTES.WATCHLIST, ROUTES.PROFILE]
+  const isProtectedRoute = protectedRoutes.includes(pathname as any)
 
-  // Handle authentication redirects
-  useEffect(() => {
-    if (!isInitialized) return
+  // Show loading while auth is initializing
+  if (isLoading) {
+    return <LoadingSpinner />
+  }
 
-    // Only redirect if trying to access a protected route without authentication
-    // BUT allow unauthenticated users to visit splash and auth pages
-    if (!isAuthenticated && !isPublicRoute) {
-      router.replace(ROUTES.AUTH)
-      return
-    }
+  // If trying to access a protected route without authentication, redirect to auth
+  if (isProtectedRoute && !isAuthenticated) {
+    router.replace(ROUTES.AUTH)
+    return <LoadingSpinner />
+  }
 
-    // Only redirect authenticated users away from auth page (not splash)
-    // Let authenticated users visit splash if they want to
-    if (isAuthenticated && pathname === ROUTES.AUTH) {
-      router.replace(ROUTES.DISCOVER)
-      return
-    }
-  }, [isAuthenticated, isInitialized, isPublicRoute, pathname, router])
-
-  // Show loading while initializing
-  if (!isInitialized) {
+  // If authenticated user tries to access auth page, redirect to discover
+  if (pathname === ROUTES.AUTH && isAuthenticated) {
+    router.replace(ROUTES.DISCOVER)
     return <LoadingSpinner />
   }
 

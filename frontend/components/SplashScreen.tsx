@@ -72,7 +72,9 @@ export default function SplashScreen({ onEnter }: SplashScreenProps) {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-3 bg-slate-800/60 backdrop-blur-sm px-6 py-3 rounded-full border border-slate-700/50 mb-6">
             <Terminal className="w-5 h-5 text-orange-500" />
-            <span className="text-slate-300 font-mono text-sm">swimo://algorithm-v2.0</span>
+            <a href="https://github.com/carlopizzuto/swimo" target="_blank" rel="noopener noreferrer" className="text-slate-300 font-mono text-sm hover:text-orange-500 transition-colors">
+              source_code://github.com/carlopizzuto/swimo
+            </a>
           </div>
           
           <h1 className="text-7xl md:text-8xl font-black text-slate-50 mb-4 tracking-tight">
@@ -226,7 +228,7 @@ export default function SplashScreen({ onEnter }: SplashScreenProps) {
         {/* Footer */}
         <div className="text-center mt-16 pt-8 border-t border-slate-800">
           <p className="text-slate-500 text-sm">
-            Built for recruiters who appreciate <span className="text-orange-500">elegant engineering</span> 
+            Built for recruiters who appreciate <span className="text-orange-500">elegant engineering </span> 
             and users who want <span className="text-orange-500">smarter recommendations</span>
           </p>
         </div>

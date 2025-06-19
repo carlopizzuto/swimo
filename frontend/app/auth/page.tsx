@@ -69,7 +69,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-900 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href={ROUTES.SPLASH} className="inline-block">
+          <Link href={ROUTES.HOME} className="inline-block">
             <h1 className="text-4xl font-bold text-white mb-2 hover:text-orange-500 transition-colors cursor-pointer">
               SWIMO
             </h1>
