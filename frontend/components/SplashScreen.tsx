@@ -9,18 +9,18 @@ interface SplashScreenProps {
 }
 
 const codeLines = [
-  "def analyze_user_preferences(swipe_history):",
-  "    feature_matrix = extract_features(swipe_history)",
-  "    user_profile = ml_model.predict(feature_matrix)",
-  "    return user_profile",
+  "def analyze_user(swipes):",
+  "    features = extract_features(swipes)",
+  "    profile = model.predict(features)",
+  "    return profile",
   "",
-  "def generate_recommendations(user_profile):",
-  "    candidates = movie_db.get_unwatched_movies()",
-  "    scores = similarity_engine.compute(user_profile, candidates)",
-  "    return ranked_recommendations(scores)",
+  "def generate_recommendations(profile):",
+  "    candidates = db.get_movies()",
+  "    scores = similarity_engine.compute(profile, candidates)",
+  "    return ranked_recs(scores)",
   "",
   "if __name__ == '__main__':",
-  "    print('SWIMO Recommendation Engine v2.0')",
+  "    print('SWIMO Recommendation Engine')",
   "    engine = RecommendationEngine()",
   "    engine.start()",
 ]
@@ -66,7 +66,7 @@ export default function SplashScreen({ onEnter }: SplashScreenProps) {
 
   return (
     <div className="fixed inset-0 bg-slate-900 text-slate-50 overflow-y-auto">
-      <div className="container mx-auto px-6 py-12 max-w-7xl min-h-full">
+      <div className="container mx-auto px-6 py-12 pb-24 md:pb-12 max-w-7xl min-h-full">
         
         {/* Header */}
         <div className="text-center mb-16">
@@ -101,7 +101,7 @@ export default function SplashScreen({ onEnter }: SplashScreenProps) {
                <span className="text-slate-400 text-sm ml-4 font-mono truncate">recommendation_engine.py</span>
              </div>
              
-             <div className="p-4 md:p-6 font-mono text-xs md:text-sm overflow-x-auto">
+             <div className="py-4 pr-2 pl-0 md:p-6 font-mono text-xs md:text-sm overflow-x-auto">
                {displayedCode.map((line, index) => (
                  <div key={index} className="flex mb-2 min-h-[1.5rem]">
                    <span className="text-slate-500 w-6 md:w-8 text-right mr-2 md:mr-4 flex-shrink-0 text-xs md:text-sm">
@@ -209,8 +209,10 @@ export default function SplashScreen({ onEnter }: SplashScreenProps) {
           </div>
         </div>
 
-        {/* CTA - Centered in page */}
-        <div className="flex items-center justify-center min-h-[200px] py-12">
+        {/* CTA */}
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-center px-6 py-4 bg-gradient-to-t from-slate-900/100 to-transparent backdrop-blur-none md:static md:py-12 md:min-h-[200px] md:bg-transparent"
+        >
           <div className="text-center">
             <Button
               onClick={onEnter}
@@ -219,17 +221,16 @@ export default function SplashScreen({ onEnter }: SplashScreenProps) {
               Initialize Algorithm
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
-            <p className="text-slate-500 text-sm mt-3">
+            <p className="text-slate-500 text-sm mt-3 hidden md:block">
               Experience intelligent movie discovery
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-16 pt-8 border-t border-slate-800">
+        <div className="text-center mt-16 mb-0 pb-0 pt-8 border-t border-slate-800">
           <p className="text-slate-500 text-sm">
-            Built for recruiters who appreciate <span className="text-orange-500">elegant engineering </span> 
-            and users who want <span className="text-orange-500">smarter recommendations</span>
+            Built for users who want <span className="text-orange-500">smarter recommendations</span> and recruiters who appreciate <span className="text-orange-500">elegant engineering </span> 
           </p>
         </div>
 
