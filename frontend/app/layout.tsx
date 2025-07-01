@@ -14,7 +14,34 @@ export const metadata: Metadata = {
     "Swipe to discover your next favorite movie. Find movies you'll love with our intuitive matching system.",
   keywords: "movies, film, recommendations, swipe, discover, entertainment",
   authors: [{ name: "SWIMO Team" }],
-  generator: 'v0.dev'
+  generator: 'v0.dev',
+  /**
+   * Favicons ──────────────────────────────────────────────
+   * Every path is relative to `/public`
+   */
+  icons: [
+    {
+      rel: 'apple-touch-icon',
+      sizes: '180x180',
+      url: '/apple-touch-icon.png',
+    },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      sizes: '32x32',
+      url: '/favicon-32x32.png',
+    },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      sizes: '16x16',
+      url: '/favicon-16x16.png',
+    },
+    {
+      rel: 'shortcut icon',
+      url: '/favicon.ico',
+    },
+  ],
 }
 
 export default function RootLayout({
