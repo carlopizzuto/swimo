@@ -72,7 +72,7 @@ export default function SplashScreen({ onEnter }: SplashScreenProps) {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-3 bg-slate-800/60 backdrop-blur-sm px-6 py-3 rounded-full border border-slate-700/50 mb-6">
             <Terminal className="w-5 h-5 text-orange-500" />
-            <a href="https://github.com/carlopizzuto/swimo" target="_blank" rel="noopener noreferrer" className="text-slate-300 font-mono text-sm hover:text-orange-500 transition-colors">
+            <a href="https://github.com/carlopizzuto/swimo" target="_blank" rel="noopener noreferrer" className="text-slate-300 font-mono text-sm hover:text-orange-500 transition-colors break-all">
               source_code://github.com/carlopizzuto/swimo
             </a>
           </div>
