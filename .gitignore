@@ -18,3 +18,14 @@ frontend/.next/
 # virtual environment
 venv/
 venv
+
+# frontend build artefacts and caches
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+frontend/out/
+frontend/build/
+frontend/dist/
+frontend/.turbo/
+frontend/.vercel/
