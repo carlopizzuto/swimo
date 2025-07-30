@@ -1,0 +1,30 @@
+# Ignore Python cache and build artefacts
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.pyo
+
+# Ignore local virtual environments and distribution folders
+venv/
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Ignore notebooks, datasets, and other large local-only files
+*.ipynb
+*.csv
+*.pkl
+*.sqlite
+
+# Ignore editor & OS files
+.DS_Store
+.vscode/
+.git
+.gitignore
+
+# Ignore local scripts & non-runtime assets
+app/scripts/
+
+# Exclude frontend entirely (handled by its own image)
+../frontend/ 
