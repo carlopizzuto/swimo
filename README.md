@@ -72,6 +72,21 @@ npm run dev
 ```
 Hot-reload is enabled on both sides. The frontend expects `NEXT_PUBLIC_API_URL` (defaults to `http://localhost:8000`).
 
+## Environment variables
+
+Create a `.env` file in the project root (or copy `.env.example`) and fill in the following values:
+
+| Variable | Purpose | Example / Default |
+|----------|---------|-------------------|
+| POSTGRES_DB | Postgres database name (Docker compose) | swimo_db |
+| POSTGRES_USER | Postgres username | swimo_user |
+| POSTGRES_PASSWORD | Postgres password | swimo_pass |
+| DATABASE_URL | SQLAlchemy URL used by the backend | postgresql://postgres:postgres@db:5432/swimo_db |
+| PROD_DATABASE_URL | Optional production DB URL (overrides DATABASE_URL) |  |
+| SECRET_KEY | JWT signing key for access tokens | change_me |
+| TMDB_API_KEY | The Movie Database API key used by the seed script to fetch posters |  |
+| NEXT_PUBLIC_API_URL | Base URL of the backend API for the Next.js app | http://localhost:8000 |
+
 ## Roadmap
 
 - [x] Docker-compose environment (Postgres + FastAPI + Next.js)
